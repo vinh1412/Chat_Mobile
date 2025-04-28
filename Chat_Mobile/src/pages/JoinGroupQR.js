@@ -1,17 +1,21 @@
 import React from 'react';
-import { View, Text, Image, TouchableOpacity, StyleSheet } from 'react-native';
+import { View, Text, TouchableOpacity, StyleSheet } from 'react-native';
 import { Linking } from 'react-native';
 import { FontAwesome } from '@expo/vector-icons';
 import MaterialIcons from '@expo/vector-icons/MaterialIcons';
 import MaterialCommunityIcons from '@expo/vector-icons/MaterialCommunityIcons';
 import AntDesign from '@expo/vector-icons/AntDesign';
-
+import QRCode from 'react-native-qrcode-svg'; // thêm dòng này
 
 const JoinGroupQR = ({navigation, route}) => {
-  const groupLink = "https://zalo.me/g/azgzfdg051"; // Link nhóm của bạn
-  const qrImage = require('../../assets/icon.png'); // Đường dẫn hình ảnh QR bạn tải về
-  // tạo 1 qa codr mẫu
+  const { linkGroup ,idconversation} = route.params;
+  const groupLink = `${linkGroup.linkGroup}`;
 
+  
+  console.log("Link nhóm nhận được:", groupLink);
+  // idconversation 
+
+  console.log("Conversation ID:", idconversation);  
 
   const handleOpenLink = () => {
     Linking.openURL(groupLink);
@@ -26,41 +30,49 @@ const JoinGroupQR = ({navigation, route}) => {
     <View style={styles.container}>
       <View style={styles.avatarContainer}>
         <View style={styles.avatarPlaceholder}>
-        <FontAwesome name="group" size={45} color="#ccc" />
+          <FontAwesome name="group" size={45} color="#ccc" />
         </View>
-
       </View>
+
       <Text style={styles.groupName}>Nhóm 3_Công nghệ mới 😊</Text>
       <Text style={styles.description}>Mời mọi người tham gia nhóm bằng mã QR hoặc link dưới đây:</Text>
-      <Image source={qrImage} style={styles.qrImage} />
+
+      {/* QR Code động */}
+      <QRCode
+        value={groupLink}
+        size={200}
+      />
+
       <TouchableOpacity onPress={handleOpenLink}>
         <Text style={styles.linkText}>{groupLink.replace('https://', '')}</Text>
       </TouchableOpacity>
+
       <View style={styles.buttonRow}>
         <TouchableOpacity style={styles.button} onPress={handleCopyLink}>
-            <View style={styles.iconWrapper}>
+          <View style={styles.iconWrapper}>
             <MaterialIcons name="content-copy" size={20} color="black" />
-            </View>
-            <Text style={styles.buttonText}>Sao chép link</Text>
+          </View>
+          <Text style={styles.buttonText}>Sao chép link</Text>
         </TouchableOpacity>
 
         <TouchableOpacity style={styles.button} onPress={handleOpenLink}>
-            <View style={styles.iconWrapper}>
+          <View style={styles.iconWrapper}>
             <MaterialCommunityIcons name="share-outline" size={20} color="black" />
-            </View>
-            <Text style={styles.buttonText}>Chia sẻ link</Text>
+          </View>
+          <Text style={styles.buttonText}>Chia sẻ link</Text>
         </TouchableOpacity>
 
         <TouchableOpacity style={styles.button} onPress={handleOpenLink}>
-            <View style={styles.iconWrapper}>
+          <View style={styles.iconWrapper}>
             <AntDesign name="arrowdown" size={20} color="black" />
-            </View>
-            <Text style={styles.buttonText}>Tải xuống</Text>
+          </View>
+          <Text style={styles.buttonText}>Tải xuống</Text>
         </TouchableOpacity>
       </View>
     </View>
   );
 };
+
 
 const styles = StyleSheet.create({
   container: {

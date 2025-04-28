@@ -14,6 +14,8 @@ import { Ionicons, Feather } from "@expo/vector-icons";
 import ActionSheet from "react-native-actions-sheet";
 import { useDispatch, useSelector } from "react-redux";
 import { leaveGroupThunk } from "../store/slice/messageSlice";
+
+import {getLinkGroup} from "../api/qaCode";
 import {
   updateGroupMembers,
   dissolveGroup,
@@ -106,6 +108,20 @@ const GroupSettingsScreen = ({ navigation, route }) => {
     ]);
   };
 
+  // xu ly lay link group
+  const handleGetLinkGroup = async () => {
+    try {
+      const linkGroup = await getLinkGroup(conversation?.id);
+      console.log("Link nhóm:", linkGroup);
+      Alert.alert("Link nhóm", linkGroup, [
+        { text: "OK", onPress: () => console.log("OK Pressed") },
+      ]);
+    } catch (error) {
+      console.error("Lỗi lấy link nhóm:", error);
+    }
+  };
+  
+
   return (
     <ScrollView style={{ flex: 1 }}>
       <View style={styles.container}>
@@ -154,15 +170,23 @@ const GroupSettingsScreen = ({ navigation, route }) => {
             })
           }
         />
-        <OptionRow color="black" icon="link" text="Link nhóm" 
-          onPress={() =>
-            navigation.navigate("JoinGroupQR", {
-              nextScreen: "JoinGroupQR",
-              conversation: conversation,
-            })
-          }
-        />
+<OptionRow
+  color="black"
+  icon="link"
+  text="Link nhóm"
+  onPress={async () => {
+    try {
+      const linkGroup = await getLinkGroup(conversation?.id);
+      console.log("Link nhóm:", linkGroup);
+      navigation.navigate("JoinGroupQR", { linkGroup, idconversation: conversation?.id });  
+    } catch (error) {
+      console.error("Lỗi lấy link nhóm:", error);
+    }
+  }}
+/>
 
+
+        {/* in ra conversation?.linkGroup */}
         {/* Ghim trò chuyện */}
         {/* <SettingToggle
                     label="Ghim trò chuyện"

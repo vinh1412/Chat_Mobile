@@ -82,7 +82,7 @@ const RequestReceived = ({ navigation }) => {
                     renderItem({ item, 
                         accept:  (requestId) => handleAcceptReq(requestId), 
                         reject:  (requestId) => handleRejecttReq(requestId) })}
-                keyExtractor={item => item.requestId}
+                keyExtractor={item => item?.requestId || Math.random().toString()}
             />
             <Loading loading={isLoading} />
         </View>

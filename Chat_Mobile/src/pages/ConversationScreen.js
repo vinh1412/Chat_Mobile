@@ -1,4 +1,4 @@
-import React from "react";
+import React, {useMemo} from "react";
 import {
   View,
   Text,
@@ -17,9 +17,20 @@ import ConservationList from "../components/ConservationList";
 import TabTopCategoryChat from "../navigation/TabTopCategoryChat";
 import IconA from "react-native-vector-icons/AntDesign";
 const { width, height } = Dimensions.get("window");
+import { useDispatch, useSelector } from 'react-redux';
 
 const ConversationScreen = ({navigation}) => {
   const [modalVisible, setModalVisible] = React.useState(false);
+
+  // gọi này truyền vào QRScannerScreen
+  const dispatch = useDispatch();
+  const userProfile = useSelector(state => state.user.user);
+  const user = useMemo(() => {
+          return userProfile || null;
+  }, [userProfile]);
+  console.log("--------------" , userProfile);
+
+
 
   return (
     <SafeAreaView style={styles.container}>
@@ -27,6 +38,8 @@ const ConversationScreen = ({navigation}) => {
         iconLeft={"qrcode"}
         iconRight={"plus"}
         onIconRightPress={() => setModalVisible(true)}
+        onIconLeftPress={()=> navigation.navigate('QRScannerScreen', {userId: user?.id})}
+        
       />
       <TabTopCategoryChat />
       {/* <ConservationList category="priority" /> */}
@@ -46,7 +59,7 @@ const ConversationScreen = ({navigation}) => {
               <Text style={{fontSize: 15}}>Thêm bạn bè</Text>
             </TouchableOpacity>
 
-            <TouchableOpacity style={styles.modalItem} onPress={() => { setModalVisible(false); navigation.navigate("CreateGroupScreen"); }}>
+            <TouchableOpacity style={styles.modalItem} onPress={() => { setModalVisible(false); navigation.navigate("CreateGroupScreen", {nextScreen: 'ConversationList'}); }}>
               <IconA name="addusergroup" size={24} color="#000" />
               <Text style={{fontSize: 15}}>Tạo nhóm</Text>
             </TouchableOpacity>

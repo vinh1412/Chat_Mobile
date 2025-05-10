@@ -53,18 +53,18 @@ const ItemSerch = ({item, isFriend, isSuccessSent, sendRequest, getChat}) => {
 
   console.log("isFriend", isFriend);
   return (
-      <TouchableOpacity key={item.id} 
+      <TouchableOpacity key={item?.id} 
           style={{cursor: 'pointer', display: 'flex', flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', gap: 8, paddingVertical: 8, paddingHorizontal: 20, borderBottomWidth: 1, borderBottomColor: '#E0E0E0'}}
           onPress={() => { getChat(item); }}
       >
           <View style={{ display: 'flex', flexDirection: 'row', alignItems: 'center', gap: 8 }}>
-            <Image source={{ uri: item.avatar }} style={styles.contactImage} />
-              <Text style={{marginLeft: 8, fontSize: 16}}>{item.display_name}</Text>
+            <Image source={{ uri: item?.avatar }} style={styles.contactImage} />
+              <Text style={{marginLeft: 8, fontSize: 16}}>{item?.display_name}</Text>
           </View>
           {/* Kiem tra xem co phai ban khong */}
           {!isFriend ? (
 
-                  <TouchableOpacity  style={{fontSize: '12px', padding: '4px 8px', backgroundColor: '#D6E9FF', paddingHorizontal: 15, paddingVertical: 5, borderRadius: 10}} onPress={() => {sendRequest(item.id)}}>
+                  <TouchableOpacity  style={{fontSize: '12px', padding: '4px 8px', backgroundColor: '#D6E9FF', paddingHorizontal: 15, paddingVertical: 5, borderRadius: 10}} onPress={() => {sendRequest(item?.id)}}>
                       <Text style={{color: "#006AF5"}}>Kết bạn</Text>
                   </TouchableOpacity>
               
@@ -93,7 +93,7 @@ const FindInfo = () => {
 
   const result = useMemo(() => {
     if (searchResults === null || searchText.trim() === "") return [];
-    return searchResults.filter((item) => item.id !== user.id); // Loại bỏ người dùng hiện tại khỏi danh sách kết quả
+    return searchResults?.filter((item) => item?.id !== user?.id); // Loại bỏ người dùng hiện tại khỏi danh sách kết quả
   }, [searchResults]);
 
   console.log("result", result);
@@ -106,11 +106,11 @@ const FindInfo = () => {
       const statusUpdates = {};
       for (const item of result) {
         try {
-          const response = await dispatch(checkFriendStatus(item.id)).unwrap();
-          statusUpdates[item.id] = response; 
+          const response = await dispatch(checkFriendStatus(item?.id)).unwrap();
+          statusUpdates[item?.id] = response; 
         } catch (error) {
-          console.log(`Lỗi khi kiểm tra trạng thái bạn bè cho ${item.id}:`, error);
-          statusUpdates[item.id] = false; 
+          console.log(`Lỗi khi kiểm tra trạng thái bạn bè cho ${item?.id}:`, error);
+          statusUpdates[item?.id] = false; 
         }
       }
       setFriendStatus((prev) => ({ ...prev, ...statusUpdates }));
@@ -125,7 +125,7 @@ const FindInfo = () => {
     if (keyword.trim() === "") return; // Nếu không có từ khóa thì không làm gì cả
     try {
       const response = await dispatch(search(keyword)).unwrap();
-      if (response.status === "SUCCESS") {
+      if (response?.status === "SUCCESS") {
         console.log("Kết quả tìm kiếm:", response.response);
       } else {
         console.log("Không tìm thấy kết quả nào.");

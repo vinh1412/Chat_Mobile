@@ -34,6 +34,13 @@ const LoginScreen = ({ navigation, route }) => {
       const response = await login(phone, password);
       
       console.log("Login successful:", response);
+      const token = response?.response?.token;
+      const refreshToken = response?.response?.refreshToken;
+  
+      console.log("Đăng nhập thành công!");
+      console.log(" Token:", token);
+      console.log(" Refresh Token:", refreshToken);
+  
 
       await storeToken(response.response.token);
 

@@ -12,68 +12,16 @@ import {
 import Icon from "react-native-vector-icons/FontAwesome";
 import { useDispatch, useSelector } from "react-redux";
 import { getMyFriends } from "../store/slice/friendSlice";
+import { createConversation, getAllConversationsByUserId } from "../store/slice/conversationSlice"
+
 import Loading from "./Loading";
 
-const dummyContacts = [
-  {
-    id: "1",
-    name: "Nguyễn Văn A",
-    phone: "0123456789",
-    avatar: "https://i.pravatar.cc/300?img=1",
-  },
-  {
-    id: "2",
-    name: "Trần Thị B",
-    phone: "0987654321",
-    avatar: "https://randomuser.me/api/portraits/women/2.jpg",
-  },
-  {
-    id: "23",
-    name: "Lê Văn C",
-    phone: "0345678901",
-    avatar: "https://randomuser.me/api/portraits/men/3.jpg",
-  },
-  {
-    id: "73",
-    name: "Lê Văn C",
-    phone: "0345678901",
-    avatar: "https://randomuser.me/api/portraits/men/4.jpg",
-  },  {
-    id: "32",
-    name: "Lê Văn C",
-    phone: "0345678901",
-    avatar: "https://randomuser.me/api/portraits/men/5.jpg",
-  },  {
-    id: "63",
-    name: "Lê Văn C",
-    phone: "0345678901",
-    avatar: "https://randomuser.me/api/portraits/men/6.jpg",
-  },  {
-    id: "5",
-    name: "Lê Văn C",
-    phone: "0345678901",
-    avatar: "https://randomuser.me/api/portraits/men/7.jpg",
-  },  {
-    id: "43",
-    name: "Lê Văn C",
-    phone: "0345678901",
-    avatar: "https://randomuser.me/api/portraits/men/8.jpg",
-  },  {
-    id: "9",
-    name: "Lê Văn C",
-    phone: "0345678901",
-    avatar: "https://randomuser.me/api/portraits/men/3.jpg",
-  },  {
-    id: "13",
-    name: "Lê Văn C",
-    phone: "0345678901",
-    avatar: "https://randomuser.me/api/portraits/men/3.jpg",
-  },
-];
 
 const PhoneBookFriend = ({navigation}) => {
   const dispatch = useDispatch();
   const  { friends, isLoading }  = useSelector((state) => state.friend);
+    const { conversations } = useSelector((state) => state.conversation);
+  
 
   console.log("friends", friends);
   console.log("isLoading", isLoading);
@@ -88,6 +36,46 @@ const PhoneBookFriend = ({navigation}) => {
     dispatch(getMyFriends());
   }
   , [dispatch]);
+
+  // tao cuoc tro chuyen 
+  const handleCreateConversation = async (item) => {
+    
+    if(!item?.userId || !item) return;
+
+    try {
+      if(Array.isArray(conversations)) {
+
+        for ( const conversation of conversations) {
+          const userReceived = conversation?.members.find((member) => member?.id === item?.userId);
+  
+          if(userReceived) {
+            console.log("Cuộc trò chuyện đã tồn tại");
+  
+            navigation.navigate("SingleChatScreen", { conversationId: conversation?.id, userReceived: userReceived });
+  
+            return;
+          }
+        }
+      }
+
+      const request = {
+        is_group: false,
+        member_id: [item?.userId],
+      }
+
+      const response = await dispatch(createConversation(request)).unwrap();
+      console.log("response", response);
+      
+      // Cập nhật danh sách cuộc trò chuyện sau khi tạo thành công
+      await dispatch(getAllConversationsByUserId()).unwrap();
+      navigation.navigate("SingleChatScreen", { conversationId: response?.id, userReceived: item });
+      
+      console.log("Đã cập nhật danh sách cuộc trò chuyện.");
+    } catch (error) {
+      console.log("Lỗi khi tạo cuộc trò chuyện:", error);
+      Alert.alert("Lỗi", "Không thể tạo cuộc trò chuyện. Vui lòng thử lại.", [{ text: "OK" }]);
+    }
+  };
 
   return (
     <View style={styles.container}>
@@ -127,7 +115,7 @@ const PhoneBookFriend = ({navigation}) => {
         data={friends}
         keyExtractor={(item) => item.userId}
         renderItem={({ item }) => (
-          <View style={styles.contactItem}>
+          <TouchableOpacity key={item?.userId} style={styles.contactItem} onPress={() => handleCreateConversation(item)}>
             <Image source={{uri:item?.avatar}} style={styles.avatar} />
             <Text style={styles.contactName}>{item?.displayName}</Text>
             <View style={styles.iconContainer}>
@@ -138,7 +126,7 @@ const PhoneBookFriend = ({navigation}) => {
                 <Icon name="video-camera" size={20} color="#007AFF" />
               </TouchableOpacity>
             </View>
-          </View>
+          </TouchableOpacity>
         )}
       />
       <Loading isLoading={isLoading} />

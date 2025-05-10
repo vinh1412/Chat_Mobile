@@ -35,7 +35,7 @@ export const sendFriendReq = async (receiverId) => {
         const response = await instance.post("/api/v1/friend/send-request", { receiverId });
         return response.data;
     } catch (error) {
-        console.error("Error sending friend request:", error);
+        console.log("Error sending friend request:", error);
         if (error.response) {
             console.log("Status:", error.response.status);
             console.log("Data:", error.response.data);

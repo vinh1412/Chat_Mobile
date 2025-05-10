@@ -27,7 +27,7 @@ const sendReq = createAsyncThunk('friend/sendReq', async (friendId, thunkAPI) =>
         const response = await sendFriendReq(friendId);
         return response;
     } catch (error) {
-        console.error("Error sending friend request:", error);
+        console.log("Error sending friend request:", error);
         return thunkAPI.rejectWithValue(error.response.data?.message || error.message);
     }
 });

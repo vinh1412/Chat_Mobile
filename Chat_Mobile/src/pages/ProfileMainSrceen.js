@@ -11,7 +11,7 @@ import { logout } from '../api/authApi';
 import { Alert } from 'react-native';
 import { updateUserProfileSuccess } from '../store/slice/userSlice';
 
-import { connectWebSocket, disconnectWebSocket } from "../config/socket";
+import { connectWebSocket, disconnectWebSocket, subscribeToUserProfile } from "../config/socket";
 
 
 const ProfileMainScreen = ({ navigation }) => {
@@ -34,16 +34,17 @@ const ProfileMainScreen = ({ navigation }) => {
             // function để xử lý khi nhận được tin nhắn từ WebSocket
             const handleMessageReceived = (updatedProfile) => {
                 console.log("Message received:", updatedProfile);
-                
                 // Xử lý thông điệp nhận được từ WebSocket
                 dispatch(updateUserProfileSuccess(updatedProfile));
             };
     
-            const client = connectWebSocket(user?.id, handleMessageReceived);
+              connectWebSocket(() => {
+                subscribeToUserProfile(user?.id, handleMessageReceived);
+            });
     
                 
             return () => {
-                disconnectWebSocket(client); // Ngắt kết nối khi component unmount
+                disconnectWebSocket(); // Ngắt kết nối khi component unmount
             }
     },[user?.id, dispatch]);
 
@@ -114,7 +115,7 @@ const ProfileMainScreen = ({ navigation }) => {
                 {/* <MenuItem icon="qrcode" title="Ví QR" subtitle="Lưu trữ và xuất trình các mã QR quan trọng" /> */}
                 <MenuItem icon="shield" title="Tài khoản và bảo mật" onPress={() => navigation.navigate("AccountSecurity")} />
 
-                <MenuItem icon="lock" title="Quyền riêng tư" />
+                <MenuItem icon="lock" title="Quyền riêng tư"/>
             </ScrollView>
         </View>
     );

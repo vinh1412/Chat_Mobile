@@ -36,6 +36,7 @@ const Header = ({ iconLeft, onIconLeftPress, iconRight, onIconRightPress }) => {
         placeholder="Tìm kiếm"
         placeholderTextColor={"#B8D9FF"}
         style={styles.search}
+        editable={false}
       />
     </TouchableOpacity>
 
@@ -45,10 +46,12 @@ const Header = ({ iconLeft, onIconLeftPress, iconRight, onIconRightPress }) => {
         {iconLeft ? (
           <TouchableOpacity onPress={onIconLeftPress}>
 
+            {/* HÀM OnIconLeftPress gọi bên ConvertionScreen */}
             <IconA
                 name={iconLeft}
                 size={24}
                 color="#fff"
+                
                 
             />
           </TouchableOpacity>
@@ -60,7 +63,8 @@ const Header = ({ iconLeft, onIconLeftPress, iconRight, onIconRightPress }) => {
             <IconA
                 name={iconRight}
                 size={24}
-                color="#fff"
+                color="#fff"                
+                
             />
           </TouchableOpacity>
         ) : <View style={styles.iconPlaceholder} />}

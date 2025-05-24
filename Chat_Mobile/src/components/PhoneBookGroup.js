@@ -1,93 +1,82 @@
-import React from "react";
+import React, {useEffect, useMemo} from "react";
 import { View, Text, FlatList, TouchableOpacity, Image, StyleSheet } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
+import { useDispatch, useSelector } from "react-redux";
+import { getAllConversationsByUserId, setConversationsGroup } from "../store/slice/conversationSlice";
+import { useNavigation } from "@react-navigation/native";
+import { connectWebSocket, disconnectWebSocket, subscribeToConversation } from "../config/socket";
 
-const messagesData = [
-  {
-    id: "5",
-    name: "Nhóm CNM",
-    message: "Làm tới đâu rồi",
-    time: "09:22",
-    avatar: "https://i.pravatar.cc/300?img=3",
-    isGroup: true,
-    members: [
-      { name: "Nguyễn Văn A", avatar: "https://i.pravatar.cc/300?img=1" },
-      { name: "Trần Văn B", avatar: "https://i.pravatar.cc/300?img=2" },
-      { name: "Lê Thị C", avatar: "https://i.pravatar.cc/300?img=4" },
-    ],
-  },
-  {
-    id: "4",
-    name: "Nhóm đẹp trai",
-    message: "Nào đẹp trai vào đây",
-    time: "14:15",
-    avatar: "https://i.pravatar.cc/300?img=4",
-    isGroup: true,
-    members: [
-      { name: "Nguyễn Văn A", avatar: "https://i.pravatar.cc/300?img=1" },
-      { name: "Trần Văn B", avatar: "https://i.pravatar.cc/300?img=2" },
-    ],
-  },
-  {
-    id: "3",
-    name: "Nhóm đẹp trai",
-    message: "Nào đẹp trai vào đây",
-    time: "14:15",
-    avatar: "https://i.pravatar.cc/300?img=4",
-    isGroup: true,
-    members: [
-      { name: "Nguyễn Văn A", avatar: "https://i.pravatar.cc/300?img=1" },
-      { name: "Trần Văn B", avatar: "https://i.pravatar.cc/300?img=2" },
-    ],
-  },
-  {
-    id: "2",
-    name: "Nhóm đẹp trai",
-    message: "Nào đẹp trai vào đây",
-    time: "14:15",
-    avatar: "https://i.pravatar.cc/300?img=4",
-    isGroup: true,
-    members: [
-      { name: "Nguyễn Văn A", avatar: "https://i.pravatar.cc/300?img=1" },
-      { name: "Trần Văn B", avatar: "https://i.pravatar.cc/300?img=2" },
-    ],
-  },
-  {
-    id: "16",
-    name: "Nhóm đẹp trai",
-    message: "Nào đẹp trai vào đây",
-    time: "14:15",
-    avatar: "https://i.pravatar.cc/300?img=4",
-    isGroup: true,
-    members: [
-      { name: "Nguyễn Văn A", avatar: "https://i.pravatar.cc/300?img=1" },
-      { name: "Trần Văn B", avatar: "https://i.pravatar.cc/300?img=2" },
-    ],
-  },
-];
+const GroupItem = ({ item }) => {
+  const navigation = useNavigation();
 
-const GroupItem = ({ item }) => (
-  <TouchableOpacity style={styles.groupItem}>
-    <View style={styles.groupAvatars}>
-      {item.members.slice(0, 4).map((member, index) => (
-        <Image key={index} source={{ uri: member.avatar }} style={styles.groupAvatar} />
-      ))}
-    </View>
+  return (
+    <TouchableOpacity key={item?.id} style={styles.groupItem}
+      onPress={() => {
+        navigation.navigate("GroupChatScreen", { conversation: item });
+      }}
+    >
+      <View style={styles.groupAvatars}>
+        {item.members.slice(0, 4).map((member, index) => (
+          <Image key={index} source={{ uri: member.avatar }} style={styles.groupAvatar} />
+          ))}
+        </View>
 
-    <View style={styles.groupContent}>
-      <Text style={styles.groupName}>{item.name}</Text>
-      <Text style={styles.groupMessage}>{item.message}</Text>
-    </View>
+        <View style={styles.groupContent}>
+          <Text style={styles.groupName}>{item?.name}</Text>
+          <Text style={styles.groupMessage}>{item?.message}</Text>
+        </View>
 
-    <Text style={styles.groupTime}>{item.time}</Text>
-  </TouchableOpacity>
-);
+        <Text style={styles.groupTime}>{item?.time}</Text>
+      </TouchableOpacity>
+
+  )
+};
 
 const GroupList = () => {
+  const dispatch = useDispatch();
+  const navigation = useNavigation();
+
+  const { conversations } = useSelector((state) => state.conversation);
+  const { user } = useSelector((state) => state.user);
+
+  const groups = useMemo(() => {
+    if(Array.isArray(conversations)) {
+      return conversations.filter((item) => item.is_group);
+    }
+    return [];
+  }, [conversations]);
+
+  useEffect(() => {
+    const fetchConversations = async () => {
+      try {
+        await dispatch(getAllConversationsByUserId()).unwrap();
+      } catch (error) {
+        console.error("Failed to fetch conversations:", error);
+      }
+    }
+    fetchConversations();
+  }, []);
+
+  useEffect(() => {
+    connectWebSocket(() => {
+      subscribeToConversation(user?.id, (message) => {
+        if(message) {
+          dispatch(setConversationsGroup(message));
+        }
+      });
+    });
+    return () => {
+      disconnectWebSocket();
+    }
+  }, [user?.id]);
+
+
   return (
     <View style={styles.container}>
       {/* Nút tạo nhóm mới */}
-      <TouchableOpacity style={styles.createGroupButton}>
+      <TouchableOpacity style={styles.createGroupButton}
+        onPress={() => { navigation.navigate("CreateGroupScreen", {nextScreen: 'ConversationList'}); }}
+      >
         <Ionicons name="person-add-outline" size={24} color="blue" style={styles.personadd}/>
         <Text style={styles.createGroupText}>Tạo nhóm mới</Text>
       </TouchableOpacity>
@@ -97,7 +86,7 @@ const GroupList = () => {
 
       {/* Header danh sách nhóm */}
       <View style={styles.groupListHeader}>
-        <Text style={styles.groupListTitle}>Nhóm đang tham gia ({messagesData.length})</Text>
+        <Text style={styles.groupListTitle}>Nhóm đang tham gia ({groups.length})</Text>
         <TouchableOpacity style={styles.sortButton}>
           <Ionicons name="swap-vertical" size={16} color="gray" />
           <Text style={styles.sortText}>Sắp xếp</Text>
@@ -106,7 +95,7 @@ const GroupList = () => {
 
       {/* Danh sách nhóm */}
       <FlatList
-        data={messagesData}
+        data={groups}
         keyExtractor={(item) => item.id}
         renderItem={({ item }) => <GroupItem item={item} />}
       />

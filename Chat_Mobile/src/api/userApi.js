@@ -84,3 +84,20 @@ export const searchUser = async (keyword) => {
       );
     }
   };
+
+  // getusre by id
+export const getUserById = async (userId) => {
+    try {
+      const response = await instance.get(`/api/v1/user/${userId}`);
+      return response.data;
+    } catch (error) {
+      console.error(
+        "Error fetching user by ID:",
+        error.response?.data || error.message
+      );
+      throw new Error(
+        error.response?.data?.message || "Failed to fetch user by ID"
+      );
+    }
+  };
+

@@ -26,22 +26,46 @@ const ChangePasswordScreen = ({ navigation }) => {
             };
             await changePassword(data);
 
-            Alert.alert("Thành công", "Mật khẩu đã được thay đổi. Vui lòng đăng nhập lại.", [
-                {
-                    text: "OK",
-                    onPress: async () => {
-                        // Xóa token và cập nhật trạng thái đăng nhập
-                        await AsyncStorage.removeItem('accessToken');
-                        await AsyncStorage.removeItem('refreshToken');
+            Alert.alert("Thành công", "Mật khẩu đã được thay đổi. Vui lòng đăng nhập lại.", {
 
-                        // Chuyển về Login bằng cách set trạng thái đăng nhập thành false
-                        setIsLoggedIn(false);
-                    }
-                }
-            ]);
+            });
+
+            Alert.alert(
+                        "Thành công",
+                        "Mật khẩu đã được thay đổi. Bạn có chắc chắn muốn đăng xuất không?",
+                        [
+                            {
+                                text: "Tiếp tục",
+                                onPress: () => console.log("Cancel Pressed"),
+                                style: "cancel",
+                            },
+                            {
+                                text: "Đăng nhập lại",
+                                onPress: async () => {
+                                    console.log("Logout confirmed");
+                                    try {
+                                        await logout();
+                                        removeToken();
+            
+                                        setIsLoggedIn(false);
+                                        setTimeout(() => {
+                                            navigation.replace("HomeScreen");
+                                        }, 1);
+                                    } catch (error) {
+                                        console.error('Error during logout:', error);
+                                    }
+                                },
+                                style: "default",
+                            }
+                        ]
+                    )
+                
         } catch (error) {
             Alert.alert("Lỗi", "Không thể đổi mật khẩu");
             console.error(error);
+
+            Alert.alert("Lỗi",  error?.response?.data?.message || error?.message, [{ text: "OK" }]);
+            
         }
     };
     return (

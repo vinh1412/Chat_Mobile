@@ -31,11 +31,12 @@ export const getFriendReqSent = async () => {
     }
 }
 export const sendFriendReq = async (receiverId) => {
+    console.log("receiverId", receiverId);
     try {
         const response = await instance.post("/api/v1/friend/send-request", { receiverId });
         return response.data;
     } catch (error) {
-        console.error("Error sending friend request:", error);
+        console.log("Error sending friend request:", error);
         if (error.response) {
             console.log("Status:", error.response.status);
             console.log("Data:", error.response.data);
@@ -97,6 +98,22 @@ export const checkFriend = async (friendId) => {
         return response.data.response; 
     } catch (error) {
         console.error("Error checking friend:", error);
+        if (error.response) {
+            console.log("Status:", error.response.status);
+            console.log("Data:", error.response.data);
+        } else {
+            console.log("Other error:", error.message);
+        }
+        throw error;
+    }
+}
+
+export const unfriendFriend = async (friendId) => {
+    try {
+        const response = await instance.post(`/api/v1/friend/unfriend/${friendId}`);
+        return response.data.response; 
+    } catch (error) {
+        console.error("Error unfriending friend:", error);
         if (error.response) {
             console.log("Status:", error.response.status);
             console.log("Data:", error.response.data);

@@ -18,8 +18,8 @@ import IconFo from "react-native-vector-icons/Fontisto";
 import ConversationScreen from "../pages/ConversationScreen";
 import SingleChatScreen from "../pages/SingleChatScreen";
 import DetailSingleChatScreen from "../pages/DetailSingleChatScreen";
-
 import Phonebook from "../pages/Phonebook";
+import DiaryMy from "../pages/blog/DiaryMy";
 
 import ProfileMainScreen from "../pages/ProfileMainSrceen";
 // import CallScreen from "../pages/CallScreen";
@@ -74,7 +74,7 @@ const TabBottom = () => {
         />
         <Tab.Screen
           name="Nhật ký" 
-          component={ConversationScreen} // Nhớ đổi tên lại
+          component={DiaryMy} // Nhớ đổi tên lại
           options={{ headerShown: false }}
         />
         <Tab.Screen

@@ -3,6 +3,7 @@ import { View, Text, FlatList, TouchableOpacity, Image, StyleSheet, Dimensions }
 import { useSelector, useDispatch } from "react-redux";
 import { getReqsSent, recallReq } from "../../store/slice/friendSlice";
 import Loading from "../Loading";
+import { connectWebSocket, subscribeFriendsToAcceptFriendRequest } from "../../config/socket";
 
 
 const {width, height} = Dimensions.get("window");
@@ -26,6 +27,8 @@ const renderItem = ({ item, recall }) => (
 const RequestSent = ({ navigation }) => {
     const dispatch = useDispatch();
     const { sentRequests, isLoading } = useSelector(state => state.friend);
+    const { user } = useSelector((state) => state.user);
+    
     const  requests = useMemo(() => {
         if(sentRequests === null) return [];
         return sentRequests;
@@ -45,6 +48,15 @@ const RequestSent = ({ navigation }) => {
     React.useEffect(() => {
         dispatch(getReqsSent());
     }, [dispatch]);
+
+    React.useEffect(() => {
+            connectWebSocket(() => {
+                subscribeFriendsToAcceptFriendRequest(user?.id, (message) => {
+                    console.log("Nhận được tin nhắn từ WebSocket:", message);
+                    dispatch(getReqsSent());
+                });
+            });
+        }, [user?.id, dispatch]);
     
     return (
         <View style={styles.container}>

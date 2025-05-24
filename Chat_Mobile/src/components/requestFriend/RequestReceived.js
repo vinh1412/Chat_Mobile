@@ -1,8 +1,9 @@
 import React, { useMemo, useCallback } from "react";
 import { View, Text, FlatList, TouchableOpacity, Image, StyleSheet, Dimensions } from "react-native";
 import { useSelector, useDispatch } from "react-redux";
-import { getReqsReceived, acceptReq, rejectReq } from "../../store/slice/friendSlice";
+import { getReqsReceived, acceptReq, rejectReq, addReceivedRequest } from "../../store/slice/friendSlice";
 import Loading from "../Loading";
+import { connectWebSocket, subscribeFriendRequestReceiver, subscribeToSendFriendRequest } from "../../config/socket";
 
 
 const {width, height} = Dimensions.get("window");
@@ -10,23 +11,23 @@ const renderItem = ({ item, accept, reject }) => {
    return (
 
         <View style={styles.requestItem}>
-            <Image source={{ uri: item.avatar }} style={styles.avatar} />
+            <Image source={{ uri: item?.avatar }} style={styles.avatar} />
             <View style={{ flexDirection: "column" }}>
     
-                <Text style={styles.displayName}>{item.displayName}</Text>  
+                <Text style={styles.displayName}>{item?.displayName}</Text>  
                 <Text style={styles.muttedText}>Muốn kết bạn</Text>  
     
                 <View style={{ flexDirection: "row", justifyContent: "space-between", marginTop: 10, gap: 10 }}>
                     <TouchableOpacity style={{ backgroundColor: "#D6E9FF", paddingVertical: 10, paddingHorizontal: width*0.1 ,borderRadius: 5 }} 
                         onPress={() => {
-                            accept(item.requestId);
-                         }}
+                            accept(item?.requestId);
+                        }}
                     >
                         <Text style={{color: "#006AF5"}}>Xác nhận</Text>
                     </TouchableOpacity>
                     <TouchableOpacity style={{ backgroundColor: "#FED8D7", paddingVertical: 10, borderRadius: 5, paddingHorizontal: width*0.1 }} 
                         onPress={() => {
-                           reject(item.requestId);
+                           reject(item?.requestId);
                         }}
                     >
                         <Text style={{color: "#DC1F18"}}>Từ chối</Text>
@@ -40,7 +41,9 @@ const renderItem = ({ item, accept, reject }) => {
 const RequestReceived = ({ navigation }) => {
     const dispatch = useDispatch();
     const { receivedFriendRequests, isLoading } = useSelector(state => state.friend);
-    const  requests = useMemo(() => {
+    const { user } = useSelector((state) => state.user);
+
+    const requests = useMemo(() => {
         if(receivedFriendRequests === null) return [];
         return receivedFriendRequests;
     }, [receivedFriendRequests]);
@@ -72,6 +75,15 @@ const RequestReceived = ({ navigation }) => {
     React.useEffect(() => {
         dispatch(getReqsReceived());
     }, [dispatch]);
+
+    React.useEffect(() => {
+        connectWebSocket(() => {
+            subscribeToSendFriendRequest(user?.id, (message) => {
+                console.log("Nhận được tin nhắn từ WebSocket:", message);
+                dispatch(addReceivedRequest(message));
+            });
+        });
+    }, [user?.id, dispatch]);
     
     return (
         <View style={styles.container}>
@@ -82,7 +94,7 @@ const RequestReceived = ({ navigation }) => {
                     renderItem({ item, 
                         accept:  (requestId) => handleAcceptReq(requestId), 
                         reject:  (requestId) => handleRejecttReq(requestId) })}
-                keyExtractor={item => item.requestId}
+                keyExtractor={item => item?.requestId || Math.random().toString()}
             />
             <Loading loading={isLoading} />
         </View>
